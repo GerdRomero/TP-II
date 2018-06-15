@@ -1,9 +1,9 @@
 #ifndef JUGADOR_H_
 #define JUGADOR_H_
 #include "Lista.h"
-//#include "Almacen.h"
 #include "Semilla.h"
 #include "Terreno.h"
+#include "Almacen.h"
 typedef unsigned short int ui;
 
 
@@ -17,11 +17,13 @@ private:
 	struct estadoJugador{
 	ui creditos;
 	ui cantAgua;
+	ui AguaMAX;
 	int turnosRestantes;
 	}estado;
 
 	Semilla *aSembrar;
 	Lista<Terreno**> *terrenos;
+	Almacen *almacen;
 	Terreno **terrenoEnJuego;
 	//Almacen *almacen;
 	//Mercado *mercado;
@@ -32,19 +34,11 @@ private:
 	Capacidad numero;
 	bool finTurno;
 public:
-
-
-
 	/*pre: dificultad valida, pedida en clase Juego
 	 * post: crea objeto y llama a subrutinas cargarDatos()
 	 *  y cargarDificJugador()*/
-
-
 	Jugador(ui dificultad);
-	/*post: setea pos[] con una fila y columna pedida para un terreno*/
-	void pedirPosicion();
-
- /*post:opciones de compra, clase Mercado*/
+	/*post:opciones de compra, clase Mercado*/
 	void comprar();
 	/*pre:numero de terreno valido en lista terrenos
 	 * post:cambia la posicion en lista terrenos para setear terrenoEnJuego*/
@@ -57,8 +51,6 @@ public:
 	/*pre: datos validos ui
 	  post:crea terreno y agrega en lista terrenos */
 	void agregarTerreno(ui fila, ui col);
-	void agregarTerreno();
-
 	/*pre: datos validos ui, aSembrar debe estar seteado desde elegirSemilla()
 	 * post: siembra en terrenoEnJuego */
 	void sembrarTerreno(Semilla* elegida);
@@ -70,12 +62,7 @@ public:
 	void cosecharTerreno();
 	/*post: devuelve un numero de terreno valido en lista terrenos*/
 	ui terrenoValido();
-	/*post: setea Semilla aSembrar deacuerdo al dato ingresado*/
-	void pedirSemillaSembrar();
-	/*post:Muestra info Semillas*/
-	void mostrarInfoSemilla();
-	/*post: Castea un tipo de Semilla existente*/
-	char tipoSemillaValida();
+
 	int verCreditos(){
 		return this->estado.creditos;
 	};
@@ -90,17 +77,19 @@ public:
 	void mostrarTerreno();
 
 	void terrenosSembrados();
-	void actualizar();
 
-	void apuntarTerreno();
 	void renovarTurno();
-	void agregarSemillas();
 	ui totalDeCredito();
 	ui totalDeAgua();
+	ui numeroDeTerrenos();
+	void agregarAgua(ui agua);
+	void procesoDeAlmacen(Lista<Semilla*>* semillas);
+	void mostrarAlmacen();
 	virtual ~Jugador();
 private:
-
-
+	void actualizar();
+	void apuntarTerreno();
+	void comprarrTerreno();
 	void agregando(std::string linea);
 	/*post:leé un archivo de cultivos, crea una lista y setea en tipos de semillas a usar
 	 * (subrutinas datosLista() y cargarCultivosJugador()*/
@@ -114,8 +103,8 @@ private:
 	/*pre: valores del menu a utilizar
 	 * post: devuelve un valor valido entre min y max*/
 	ui opcionValida(ui min, ui max);
-	/*pre:Debe haber un terreno en lista del jugador
-	 * post: cotiza,remueve y agrega creditos al jugador*/
+	/* pre: cantTerreno debe ser mayor a 1.
+	   post: cotiza,remueve y agrega creditos al jugador*/
 	void venderTerreno();
 
 	void comprarSemillas();
@@ -131,13 +120,7 @@ private:
 	/*pre:Se llama luego de invocar al contructor, recibe una linea de texto
 	 * y una referencia a una lista
 	 * post:En la lista referenciada carga los datos de la linea de texto*/
-	void datosLista(std::string linea,Lista<std::string>&datos);
-	/*pre:Se invoca luego del constructor y de datosLista()
-	 * post:Setea las propiedades de Semilla con una referencia a lista
-	 * */
-	void cargarCultivosJugador(Lista<std::string>*datos);
-	/*pre:Invocado luego del contructor
-	 * post:Setea propiedades de Jugador de acuerdo a dificultad*/
+
 	void cargarDificJugador(ui dificultad);
 	void agregarCultivos(char tipo, ui cant);
 	char semillaValida(ui opcion);

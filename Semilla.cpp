@@ -3,7 +3,7 @@
 
 Semilla::Semilla() {
 	this->tipo = ' ';
-	this->costo=NULL;
+	this->costo = NULL;
 	this->tiempoCosecha=NULL;
 	this->rentabilidad=NULL;
 	this->tiempoRecup=NULL;

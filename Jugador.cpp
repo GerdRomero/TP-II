@@ -46,13 +46,13 @@ void Jugador::cargarDificJugador(ui dificultad){
 		N=7, M=9;
 	}
 	agregarTerreno(N+1,M+1);
-	//Almacen *almacen=new Almacen(2*(N+M));
-	//this->almacen=new Almacen(2*(N+M));
+	this->almacen=new Almacen(2*(N+M));
 	this->estado.creditos=2*N*M;
-	this->estado.cantAgua=N*M;
+	this->estado.cantAgua = 0;
 	this->estado.turnosRestantes=2*N*M;
 	this->numero.filas = N+1;
 	this->numero.culumnas = M+1;
+	this->estado.AguaMAX = N*M;
 	apuntarTerreno();
 
 }
@@ -67,56 +67,8 @@ ui Jugador::opcionValida(ui min, ui max){
 	}
 	return opcion;
 }
-/*
-void Jugador::venderTerreno(){
-	ui terrenoAVender=terrenoValido();
-	Terreno **terrenoACotizar=this->terrenos->obtener(terrenoAVender);
-	if(terrenoAVender!=this->posicionTerrenoEnJuego){
-	//ui ganancia=this->mercado->cotizarTerreno(terrenoACotizar);
-	this->terrenos->remover(terrenoAVender);
-	this->estado.creditos+=ganancia;
-	std::cout<<"Se vendio el terreno correctamente. "<<std::endl;
-	}
-	else{
-		std::cout<<"Debe cambiar el terreno que está"
-				" utilizando para venderlo"<<std::endl;
-	}
-}*/
 
 
-
-/*
-void Jugador::verificarDimensionTerreno(){
-	ui fil, col;
-	std::cout<<"Ingrese la fila :"<<std::endl;
-	std::cin>>fil;
-	this->pos[0]=fil;
-	std::cout<<"Ingrese la columna: "<<std::endl;
-	std::cin>>col;
-	this->pos[1]=col;
-	if (fil>(2*this->dificultad)||col>(2*this->dificultad)){
-		std::cout<<"Puede comprar un terreno de hasta "<<
-				(2*this->dificultad)<<"*"<<(2*this->dificultad)<<std::endl;
-		verificarDimensionTerreno();
-	}
-}*/
-
-/*
-void Jugador::comprarTerreno(){
-	falta tomar el caso de pedir dimension por dificultad
-	verificarDimensionTerreno();
-	ui fil=filaTerreno();
-	ui col=columnaTerreno();
-	//std::cout<<fil<<" * "<<col<<"dimensiones "<<std::endl;
-	//ui costo=this->mercado->venderTerreno(fil, col);
-	if(hayCreditos(costo)){
-		agregarTerreno(fil,col);
-		this->estado.creditos-=costo;
-		std::cout<<"Se compro un terreno exitosamente. "<<std::endl;
-	}else{
-		std::cout<<"No hay creditos suficientes"<<std::endl;
-	}
-}*/
 
 /*
 void Jugador::comprarCapacAlmacen(){
@@ -141,47 +93,79 @@ bool Jugador::hayCreditos(ui costoCompra){
 	ui comparacion=this->estado.creditos;
 	return (comparacion-costoCompra)>=0;
 }
-/*
+
 void Jugador::venderCosecha(){
-	ui costo, cantAEnviar;
-	//this->almacen->leerDestino();
-	cantAEnviar=this->almacen->elegirCosecha();
-	costo=this->almacen->prepararCosecha(cantAEnviar);
-	if(hayCreditos(costo)&&cantAEnviar>0){
-		char cosecha=this->almacen->obtenerTipoCosechaPreparada();
-		ui ganancia=this->mercado->venderCosecha(cosecha,cantAEnviar);
-		this->estado.creditos+=ganancia;
-		std::cout<<"Se envio correctamente la cosecha. "<<std::endl;
-		std::cout<<"Obtuvo "<<ganancia<< " de ganancia. "<<std::endl;
-		//this->almacen->vaciarCosecha();
+	ui opcionDestino, opcionCosecha;
+	std::cout<<"QUE COSECHA DESEA VENDER :"<<endl;
+	this->almacen->mostrarCosechas();
+	std::cin>> opcionCosecha;
+
+	std::cout<<"A DONDE DESEA VENDER SU COSECHA."<<
+			"CADA DESTINO TIENE UN TIPO DE COSECHA Y COSTOS DIFERENTES : "<<endl;
+	this->almacen->mostrarDestinos();
+	cin>> opcionDestino;
+	if (this->almacen->coincideCosechaDestino(opcionCosecha,opcionDestino)){
+		ui ganacia;
+		ui cobro = this->almacen->destinoElegido(opcionDestino);
+		this->estado.creditos -= cobro;
 	}
 	else{
-		std::cout<<"No hay creditos suficientes o no tiene cosecha de ese tipo."<<std::endl;
+		std::cout<<"*** NO PUEDE VENDER LA COSECHA A ESE DESTINO **"<<endl;
 	}
-} */
-void Jugador::mostrarMenuCompras(){
-	std::cout<<"1- Comprar semillas "<<std::endl;
-	std::cout<<"2- Vender Cosecha "<<std::endl;
-	std::cout<<"3- Comprar Terreno "<<std::endl;
-	std::cout<<"4 -Vender Terreno "<<std::endl;
-	std::cout<<"5- Comprar espacio en Almacen "<<std::endl;
-	std::cout<<"6- Volver al Menu anterior "<<std::endl;
-
-
 }
+
+
+/* Comprar Terreno */
+void Jugador::comprarTerreno(){
+	ui costo = ((this->numero.filas) * (this->numero.culumnas))/2;
+	if (this->estado.creditos > costo){
+		this->agregarTerreno(this->numero.filas,this->numero.culumnas);
+		this->estado.creditos -= costo;
+		std::cout<<"** COMPRO EL TERRENO CON EXITO **"<<endl;
+	}
+	else{
+		std::cout<<"** NO CUENTA CON SUFICIENTE CREDITO PARA COMPRAR UN TERRENO **"<<endl;
+	}
+	cout<<endl;
+}
+
+void Jugador::venderTerreno(){
+	ui posicion = 0;
+	ui costo = (((this->numero.filas) * (this->numero.culumnas))/2) - this->numero.culumnas;
+	if(this->cantTerrenos > 1){
+		while (posicion < 1 || posicion > this->cantTerrenos){
+			std::cout<<"Tiene "<<this->cantTerrenos<<" terrenos. Cual desea vender."<<endl;
+			std::cin>> posicion;
+			this->terrenos->remover(posicion);
+			this->estado.creditos -= costo;
+		}
+	}
+	else{
+		std::cout<<"** NO PUEDE VENDER UN TERRENO SI SOLO TIENE 1 **"<<endl;
+	}
+	apuntarTerreno();
+	cout<<endl;
+}
+
+void Jugador::mostrarMenuCompras(){
+	std::cout<<"1- COMPRAR TERRENO "<<std::endl;
+	std::cout<<"2- VENDER TERRENO"<<std::endl;
+	std::cout<<"3  VENDER COSECHA"<<std::endl;
+	std::cout<<"4- COMPRAR ESPACIO DE ALMACEN "<<std::endl;
+	std::cout<<"6- VOLVER AL MENU ANTERIOR "<<std::endl;
+}
+
 void Jugador::comprar(){
 	mostrarMenuCompras();
 	ui opcion=opcionValida(1,6);
+
 	switch(opcion){
-	case 1:
-		//comprarSemillas();
-		break;
-	case 2:
-		//venderCosecha();
-		break;
-	case 3:
-		//comprarTerreno();
-		break;
+	case 1:{comprarTerreno();
+			break;}
+	case 2:{venderTerreno();
+			break;}
+	case 3:venderCosecha();
+		   break;
 	case 4:
 		//venderTerreno();
 		break;
@@ -214,29 +198,15 @@ void Jugador::agregarTerreno(ui fil, ui col){
 
 }
 
-void Jugador::agregarTerreno(){
-	ui fila = this->numero.filas;
-	ui columna = this->numero.culumnas;
-	Terreno ** terreno = new Terreno*[fila];
-	for( ui i=0; i < columna; i++ )
-	  terreno[i] = new Terreno[columna];
-	this->terrenos->agregar(terreno);
-	this->cantTerrenos+=1;
-}
-
 void Jugador::obtenerTerrenoEnJuego(ui posicionTerreno){
 	this->terrenoEnJuego=this->terrenos->obtener(posicionTerreno);
 }
 ui Jugador::terrenoValido(){
-	ui posTerreno;
-	std::cout<<this->cantTerrenos<<std::endl;
-	std::cout<<"Ingrese un numero de terreno: "<<std::endl;
-	std::cout<<"Tiene "<<this->cantTerrenos<<" terrenos. "<<std::endl;
-	std::cin>>posTerreno;
-	if(posTerreno>this->cantTerrenos|| posTerreno<=0){
+	ui posTerreno = 0;
+	while((posTerreno > this->cantTerrenos) || (posTerreno < 1)){
 		std::cout<<"Tiene "<<this->cantTerrenos<<" terrenos. "<<std::endl;
-		std::cout<<"Ingrese un numero de terreno valido: "<<std::endl;
-		terrenoValido();
+		std::cout<<"A que terreno desea cambiar: "<<std::endl;
+		std::cin>> posTerreno;
 	}
 	return posTerreno;
 }
@@ -276,6 +246,7 @@ void Jugador::regarTerreno(){
 		this->estado.cantAgua-=this->aSembrar->cantidadAguaTurno();
 		this->terrenoEnJuego[fil][col].aumentarNumeroDeRiegos();
 		std::cout<<"***** REGO CORRECTAMENTE *****"<<endl;
+		std::cout<<"* LE QUEDAN "<<this->estado.cantAgua<<" UNIDADES DE RIEGO *"<<endl;
 	}
 	else{
 		std::cout <<"***** INTENTA REGAR DONDE NO HAY NADA SEMBRADO*****"<<std::endl;
@@ -294,8 +265,9 @@ void Jugador::cosecharTerreno(){
 		(this->terrenoEnJuego[fil][col].regoCorrectamente())){
 
 		this->estado.creditos += this->terrenoEnJuego[fil][col].obtenerRentabilidad();
+		this->almacen->agregarCosecha(this->terrenoEnJuego[fil][col].mostrarTipo());
 		this->terrenoEnJuego[fil][col].cambiarACosechado();
-		std::cout<<"***** COSECHO CORRECTAMENTE *****"<<endl;
+		std::cout<<"** COSECHO CORRECTAMENTE Y SU COSECHA FUE GUARDADA EN EL ALMACEN **"<<endl;
 	}
 	else{
 		std::cout <<"***** NO SE PUEDE COSECHAR *****"<<std::endl;
@@ -304,16 +276,7 @@ void Jugador::cosecharTerreno(){
 
 Terreno**Jugador::obtenerTerreno(){
 	return this->terrenoEnJuego;
-
 }
-
-void Jugador::mostrarInfoSemilla(){
-	/*Vale por info con punteros*/
-	std::cout<<""<<std::endl;
-	std::cout<<""<<std::endl;
-	std::cout<<""<<std::endl;
-}
-
 
 void Jugador::finalizarTurno(){
 	this->finTurno=true;
@@ -370,6 +333,25 @@ ui Jugador::totalDeCredito(){
 
 ui Jugador::totalDeAgua(){
 	return this->estado.cantAgua;
+}
+
+ui Jugador::numeroDeTerrenos(){
+	return this->cantTerrenos;
+}
+
+void Jugador::agregarAgua(ui agua){
+	if (agua > this->estado.AguaMAX){
+		agua = this->estado.AguaMAX;
+	}
+	this->estado.cantAgua = agua;
+}
+
+void Jugador::procesoDeAlmacen(Lista<Semilla*>* semillas){
+	this->almacen->procesarSemillas(semillas);
+}
+
+void Jugador::mostrarAlmacen(){
+	this->almacen->mostrarCosechas();
 }
 
 Jugador::~Jugador() {

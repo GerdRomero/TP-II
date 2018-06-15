@@ -11,11 +11,13 @@ Juego::Juego() {
 	this->semillas = new Lista<Semilla*>;
 	this->cantJugadores = 0;
 	this->turnosJuego=0;
+	this->potenciador = 0;
 	this->juegoTerminado = false;
 	this->jugadorActual=NULL;
 	this->posJugadorEnJugadores=1;
 	this->dificultad = 0;
 	agregarSemillas();
+
 }
 
 
@@ -24,6 +26,15 @@ void Juego::agregarJugadores(ui cantidad){
 		Jugador *jugador=new Jugador(this->dificultad);
 		this->jugadores->agregar(jugador);
 		this->cantJugadores ++;
+	}
+	semillasAlAlmacendelJugador();
+}
+
+void Juego::semillasAlAlmacendelJugador(){
+	this->jugadores->iniciarCursor();
+	while(this->jugadores->avanzarCursor()){
+		Jugador* jugador = this->jugadores->obtenerCursor();
+		jugador->procesoDeAlmacen(this->semillas);
 	}
 }
 
@@ -82,6 +93,8 @@ void Juego::comenzarTurno(){
 	this->jugadores->iniciarCursor();
 	while(this->jugadores->avanzarCursor()){
 		this->jugadorActual=this->jugadores->obtenerCursor();
+		this->potenciador = tirarDados();
+		this->jugadorActual->agregarAgua(potenciador*5);
 		Jugar();
 	}
 	contarTurnos();
@@ -117,17 +130,19 @@ void  Juego::menu(){
 	std::cout<<"HAY "<<this->cantJugadores<<" JUGADORES JUGANDO. "<<std::endl;
 	std::cout<<"El jugador "<<posicionDeJugador()
 			<<" esta jugando. "<<" Tiene "<<this->jugadorActual->totalDeCredito()<<" monedas."<<std::endl;
-	std::cout<<"Tiene "<<this->jugadorActual->totalDeAgua()<<" unidades de riego."<<endl;
 
 	std::cout<<"Tiene "<< this->turnosJuego<<" turnos."<<endl;
+	std::cout<<"Tiro dados y obtuvo: "<<this->potenciador<<endl;
+	std::cout<<"Tiene "<<this->jugadorActual->totalDeAgua()<<" unidades de riego."<<endl;
 	std::cout<<"******* MENU *******"<<std::endl;
 	std::cout<<"1)SEMBRAR."<<std::endl;
 	std::cout<<"2)REGAR."<<std::endl;
 	std::cout<<"3)COSECHAR."<<std::endl;
-	std::cout<<"4)COMPRAR."<<std::endl;
-	std::cout<<"5)CAMBIAR TERRENO EN JUEGO."<<std::endl;
-	std::cout<<"6)MOSTRAR TERRENO EN JUEGO."<<std::endl;
-	std::cout<<"7)PASAR TURNO."<<std::endl;
+	std::cout<<"4)MERCADO."<<std::endl;
+	std::cout<<"5)MOSTRAR ALMACEN."<<std::endl;
+	std::cout<<"6)CAMBIAR TERRENO EN JUEGO."<<std::endl;
+	std::cout<<"7)MOSTRAR TERRENO EN JUEGO."<<std::endl;
+	std::cout<<"8)PASAR TURNO."<<std::endl;
 }
 
 /********************************** AGREGE ***********************************/
@@ -182,13 +197,20 @@ void Juego::mostrarOpciones(){
 	case 4:
 		this->jugadorActual->comprar();
 		break;
-	case 5:
-		this->jugadorActual->obtenerTerrenoEnJuego(this->jugadorActual->terrenoValido());
+	case 5:this->jugadorActual->mostrarAlmacen();
+		   break;
+	case 6:{ if(this->jugadorActual->numeroDeTerrenos() > 1){
+				this->jugadorActual->obtenerTerrenoEnJuego(this->jugadorActual->terrenoValido());
+			 }
+			 else{
+				 std::cout<<"** SOLO POSEE UN TERRENO **"<<endl;
+			 }
+			 std::cout<<endl;
+			break;}
+	case 7:
+		mostrarOpciones();
 		break;
-	case 6:
-		this->jugadorActual->mostrarTerreno();
-		break;
-	case 7:{
+	case 8:{
 		this->posJugadorEnJugadores++;
 		revisarEstados();
 		this->jugadorActual->finalizarTurno();
@@ -231,6 +253,12 @@ void Juego::agregarSemillas(){
 			this->semillas->agregar(semilla);
 		}
 	}
+}
+
+ui Juego::tirarDados(){
+	ui potenciador= (1 + rand() % 6) ;
+	return potenciador;
+
 }
 
 Juego::~Juego() {

@@ -20,6 +20,7 @@ private:
 	ui cantJugadores;
 	ui turnosJuego;
 	ui dificultad;
+	ui potenciador;
 	bool juegoTerminado;
 
 public:
@@ -38,6 +39,8 @@ public:
 	void elegirDificultad();
 	virtual ~Juego();
 private:
+	void semillasAlAlmacendelJugador();
+	ui tirarDados();
 	Semilla* elegirSemilla();
 	void mostrarSemillas();
 	/*pre:Debe invocarse agregarJugadores() antes
